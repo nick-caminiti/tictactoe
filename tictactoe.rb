@@ -1,23 +1,30 @@
 # this is board
 class Board
+  # attr_reader :winner
+  @winner = 0
+
+  def self.winner
+    @winner
+  end
+
+  def self.check_for_space
+    @board_positions.key('_')
+  end
+
   def self.create_board
-    @board_positions = { a1: 'X', b1: 'X', c1: 'X', a2: '_', b2: 'X', c2: 'O', a3: '_', b3: ' ', c3: 'X' }
+    @board_positions = { a1: '_', b1: '_', c1: '_', a2: '_', b2: '_', c2: '_', a3: '_', b3: '_', c3: '_' }
     @player_positions = {}
   end
 
   def self.print_board
-    puts '  a|b|c'
-    puts "1 #{@board_positions[:a1]}|#{@board_positions[:b1]}|#{@board_positions[:c1]}"
-    puts "2 #{@board_positions[:a2]}|#{@board_positions[:b2]}|#{@board_positions[:c2]}"
-    puts "3 #{@board_positions[:a3]}|#{@board_positions[:b3]}|#{@board_positions[:c3]}"
+    puts '  1|2|3'
+    puts "a #{@board_positions[:a1]}|#{@board_positions[:a2]}|#{@board_positions[:a3]}"
+    puts "b #{@board_positions[:b1]}|#{@board_positions[:b2]}|#{@board_positions[:b3]}"
+    puts "c #{@board_positions[:c1]}|#{@board_positions[:c2]}|#{@board_positions[:c3]}"
   end
 
-  def self.update_board
-    # update board
-  end
-
-  def self.check_for_winner(player)
-    @player_positions[player] = @board_positions.select do |position, value|
+  def self.create_win_scenario_hash(player)
+    @player_positions[player] = @board_positions.select do |_position, value|
       value == player
     end
     @win_scenarios = Hash.new(0)
@@ -26,50 +33,51 @@ class Board
       @win_scenarios[position[0]] += 1
       @win_scenarios["#{position[1]}row"] += 1
     end
-    puts @win_scenarios.key(3)
-    puts @win_scenarios.values_at(:a1, :b2, :c3).sum == 3
-    puts @win_scenarios.values_at(:a3, :b2, :c1).sum == 3
+  end
+
+  def self.check_for_winner(player)
+    create_win_scenario_hash(player)
+    if @win_scenarios.key(3) || @win_scenarios.values_at(:a1, :b2, :c3).sum == 3 || @win_scenarios.values_at(:a3, :b2, :c1).sum == 3
+      @winner = 1
+    end
   end
 
   def self.gets_user_input(turn)
     puts "Player #{turn}, you're up!"
-    selection = gets.chomp
+    selection = ''
+    until check_if_available(selection)
+      puts 'Enter selection as numberletter (e.g. a1)'
+      selection = gets.chomp
+    end
     @board_positions[selection.to_sym] = turn
+  end
+
+  def self.check_if_available(selection)
+    @board_positions[selection.to_sym] == '_'
   end
 end
 
 Board.create_board
 Board.print_board
-Board.check_for_winner('X')
-# Board.check_for_winner('O')
-# Board.gets_user_input('X')
-# Board.print_board
-# Board.check_for_winner
 
-# places a player move on the board
-class Position < Board
-  def initialize(player, xcoordinate, ycoordinate)
-    @player = player
-    @xcoordinate = xcoordinate
-    @ycoordinate = ycoordinate
-  end
-
-  def self.gets_user_input(turn)
-    puts "Player #{turn}, you're up!"
-    selection = gets.chomp
-    @board_positions[selection.to_sym] = turn
-  end
+round = 0
+turn = 'X'
+board_full = 0
+until Board.winner >= 1 || board_full >= 1
+  turn = if round.even?
+           'X'
+         else
+           'O'
+         end
+  Board.gets_user_input(turn)
+  Board.print_board
+  Board.check_for_winner(turn)
+  board_full = 1 unless Board.check_for_space
+  round += 1
 end
 
-
-
-# creates the playes 
-class Player
-  def initialize(char)
-    @char = char
-  end
+if Board.winner >= 1
+  puts "Player #{turn} wins!"
+else
+  puts "We'll call it a draw!"
 end
-
-
-# can't overwrite
-# regex for input
