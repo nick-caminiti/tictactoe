@@ -1,11 +1,12 @@
+# game
 class Game
   attr_accessor :board_array
-  
-  def initialize(player_1, player_2)
-    @player_1 = player_1
-    @player_2 = player_2
-    @player1_letter = player_1.player_letter
-    @player2_letter = player_2.player_letter
+
+  def initialize(player1, player2)
+    @player1 = player1
+    @player2 = player2
+    @player1_letter = player1.player_letter
+    @player2_letter = player2.player_letter
     @current_player_letter = @player2_letter
     @win = 'no'
     @space = 'yes'
@@ -21,18 +22,19 @@ class Game
       check_for_winner(@current_player_letter)
       check_for_full_board
     end
+    puts final_message
+  end
 
+  def final_message
     if @win == 'yes'
-      puts "Game over, player #{@current_player_letter} wins!"
+      "Game over, player #{@current_player_letter} wins!"
     else
-      puts "We'll call it a draw!"
+      "We'll call it a draw!"
     end
   end
 
   def check_for_full_board
-    if ([1,2,3,4,5,6,7,8,9] - board_array) == [1,2,3,4,5,6,7,8,9]
-      @space = 'no'
-    end
+    @space = 'no' if ([1, 2, 3, 4, 5, 6, 7, 8, 9] - board_array) == [1, 2, 3, 4, 5, 6, 7, 8, 9]
   end
 
   def check_for_winner(player_letter)
@@ -40,24 +42,20 @@ class Game
     player_positions = []
 
     board_array.each_with_index do |value, index| 
-      if value == player_letter
-        player_positions << index
-      end
+      player_positions << index if value == player_letter
     end
 
     winning_positions.each do |winning_array|
-      if (winning_array - player_positions).empty?
-        @win = 'yes'
-      end
+      @win = 'yes' if (winning_array - player_positions).empty?
     end
   end
 
   def update_player
-    if @current_player_letter == @player1_letter
-      @current_player_letter = @player2_letter
-    else
-      @current_player_letter = @player1_letter
-    end
+    @current_player_letter = if @current_player_letter == @player1_letter
+                               @player2_letter
+                             else
+                               @player1_letter
+                             end
   end
 
   def print_num(player)
@@ -65,7 +63,7 @@ class Game
   end
 
   def create_board_array
-    @board_array = [0,1,2,3,4,5,6,7,8,9]
+    @board_array = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   end
 
   def print_board
@@ -82,22 +80,21 @@ class Game
     board_array[input] = player
   end
 
-
   def get_input(player)
     pass = 0
     until pass == 1
       puts "Player #{player}, you're up. Enter an open number."
       begin
         input = Kernel.gets.chomp.match(/^[1-9]{1}$/)[0]
-      rescue
+      rescue StandardError => _e
         puts 'Try again'
-      else 
+      else
         if check_available(input) == true
           pass = 1
           return input
         end
       end
-    end 
+    end
   end
 
   def check_available(input)
@@ -109,9 +106,8 @@ class Game
   end
 end
 
-
+# players
 class Player
-
   attr_reader :player_letter
 
   def initialize(player_type, player_letter)
@@ -123,10 +119,8 @@ end
 class HumanPlayer < Player
 end
 
-player_1 = Player.new('human', 'X')
-player_2 = Player.new('human', 'O')
+player1 = Player.new('human', 'X')
+player2 = Player.new('human', 'O')
 
-new_game = Game.new(player_1, player_2)
+new_game = Game.new(player1, player2)
 new_game.play_game
-
-
